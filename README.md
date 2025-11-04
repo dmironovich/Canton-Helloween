@@ -1,4 +1,4 @@
-# 🎃 Rialo Halloween Run
+# 🎃 Canton Halloween Run
 
 Это минимальная версия игры в стиле Chrome Dino, адаптированная под GitHub Pages.
 
