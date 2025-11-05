@@ -1,6 +1,6 @@
 const canvas = document.getElementById('game-canvas');
 const ctx = canvas.getContext('2d');
-canvas.width = window.innerWidth;
+canvas.width = 400;
 canvas.height = window.innerHeight;
 
 const startScreen = document.getElementById('start-screen');
@@ -24,7 +24,7 @@ const gravity = 0.5;
 const jumpStrength = -10;
 const platformSpacing = canvas.height / 12;
 const platformHeight = canvas.height / 10;
-const platformWidth = canvas.width / 5;
+const platformWidth = canvas.width / 1.5;
 const pumpkinPattern = [3, 4, 7];
 
 const images = {};
@@ -180,3 +180,23 @@ function updateLeaderboard() {
     leaderboard.appendChild(li);
   });
 }
+
+// Управление с клавиатуры
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowLeft') player.x -= canvas.width / 20;
+  if (e.key === 'ArrowRight') player.x += canvas.width / 20;
+});
+
+// Управление свайпом
+let touchStartX = null;
+canvas.addEventListener('touchstart', (e) => {
+  touchStartX = e.touches[0].clientX;
+});
+
+canvas.addEventListener('touchend', (e) => {
+  if (touchStartX === null) return;
+  const touchEndX = e.changedTouches[0].clientX;
+  const dx = touchEndX - touchStartX;
+  if (Math.abs(dx) > 30) {
+    if (dx > 0) player.x += canvas.width / 20;
+    else player.x -= canvas.width / 20;
