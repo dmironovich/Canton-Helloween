@@ -22,8 +22,9 @@ let scrollOffset = 0;
 
 const gravity = 0.5;
 const jumpStrength = -10;
-const platformSpacing = 60;
-const platformHeight = 60;
+const platformSpacing = canvas.height / 12;
+const platformHeight = canvas.height / 10;
+const platformWidth = canvas.width / 5;
 const pumpkinPattern = [3, 4, 7];
 
 const images = {};
@@ -68,23 +69,29 @@ function initGame() {
 
   const firstPlatform = platforms[0];
   player = {
-    x: firstPlatform.x + firstPlatform.width / 2 - 20,
-    y: firstPlatform.y - 40,
-    width: 40,
-    height: 40,
-    vy: jumpStrength // сразу прыгает
+    x: firstPlatform.x + firstPlatform.width / 2 - canvas.width / 20,
+    y: firstPlatform.y - canvas.height / 15,
+    width: canvas.width / 10,
+    height: canvas.height / 15,
+    vy: jumpStrength
   };
 
   requestAnimationFrame(gameLoop);
 }
 
 function createPlatform(index) {
-  const x = Math.random() * (canvas.width - 80);
+  const x = Math.random() * (canvas.width - platformWidth);
   const y = canvas.height - index * platformSpacing;
-  platforms.push({ x, y, width: 80, height: platformHeight });
+  platforms.push({ x, y, width: platformWidth, height: platformHeight });
 
   if (pumpkinPattern.includes(index % 10)) {
-    pumpkins.push({ x: x + 30, y: y - 30, width: 20, height: 20, collected: false });
+    pumpkins.push({
+      x: x + platformWidth / 2 - canvas.width / 40,
+      y: y - canvas.height / 30,
+      width: canvas.width / 20,
+      height: canvas.height / 30,
+      collected: false
+    });
   }
 }
 
@@ -137,7 +144,7 @@ function gameLoop() {
 
   ctx.drawImage(images.player, player.x, player.y, player.width, player.height);
   ctx.fillStyle = 'orange';
-  ctx.font = '20px monospace';
+  ctx.font = `${canvas.width / 25}px monospace`;
   ctx.fillText(`🎃 Collected: ${pumpkinsCollected}`, 10, 30);
 
   if (player.y > canvas.height) {
@@ -173,4 +180,3 @@ function updateLeaderboard() {
     leaderboard.appendChild(li);
   });
 }
-
