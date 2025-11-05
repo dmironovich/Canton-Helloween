@@ -14,31 +14,34 @@ function startGame() {
   playerName = document.getElementById("player-name").value || "Anonymous";
   document.getElementById("start-screen").style.display = "none";
   document.getElementById("game-container").style.display = "block";
+  document.getElementById("restart-button").style.display = "none";
+  score = 0;
+  document.getElementById("score").textContent = `Pumpkins: 0`;
   init();
   gameRunning = true;
   requestAnimationFrame(gameLoop);
 }
 
 function restartGame() {
-  score = 0;
-  document.getElementById("score").textContent = `Pumpkins: 0`;
-  init();
+  startGame();
 }
 
 function init() {
-  // Создаём платформы
+  // Ступенчатое расположение платформ
   platforms = [];
+  const stepY = 100;
+  const baseY = canvas.height - 60;
   for (let i = 0; i < 5; i++) {
     platforms.push({
-      x: Math.random() * (canvas.width - 80),
-      y: canvas.height - (i * 120 + 100),
-      width: 80,
-      height: 20,
+      x: 60 + (i % 2 === 0 ? 0 : 200),
+      y: baseY - i * stepY,
+      width: 96,
+      height: 24,
       img: loadImage("assets/platform.png")
     });
   }
 
-  // Ставим игрока на первую платформу
+  // Игрок стартует на нижней платформе
   const firstPlatform = platforms[0];
   player = {
     x: firstPlatform.x + 20,
@@ -49,12 +52,12 @@ function init() {
     img: loadImage("assets/canton.png")
   };
 
-  // Создаём тыквы
+  // Тыквы
   pumpkins = [];
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < 5; i++) {
     pumpkins.push({
-      x: Math.random() * (canvas.width - 24),
-      y: Math.random() * (canvas.height - 100),
+      x: platforms[i].x + 30,
+      y: platforms[i].y - 30,
       width: 24,
       height: 24,
       collected: false,
@@ -117,8 +120,9 @@ function gameLoop() {
   // Game Over
   if (player.y > canvas.height) {
     saveScore();
-    alert("Game Over!");
     gameRunning = false;
+    document.getElementById("restart-button").style.display = "inline-block";
+    alert("Game Over!");
   }
 
   requestAnimationFrame(gameLoop);
@@ -144,3 +148,4 @@ function updateLeaderboard(scores) {
 }
 
 updateLeaderboard(JSON.parse(localStorage.getItem("cantonScores") || "[]"));
+
