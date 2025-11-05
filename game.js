@@ -1,3 +1,4 @@
+window.onload = () => {
 const canvas = document.getElementById('game-canvas');
 const ctx = canvas.getContext('2d');
 canvas.width = 400;
@@ -206,5 +207,5 @@ canvas.addEventListener('touchend', (e) => {
     else player.x -= canvas.width / 20;
   }
   touchStartX = null;
-});
+});};
 
