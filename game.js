@@ -49,7 +49,7 @@ function init() {
     width: 32,
     height: 32,
     vy: 0,
-    img: loadImage("assets/canton.png")
+    img: loadImage("assets/2canton.png")
   };
 
   // Тыквы
