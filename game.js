@@ -21,16 +21,16 @@ window.onload = () => {
   let player;
   let gameOver = false;
   let scrollOffset = 0;
+  let keysPressed = {};
 
   const gravity = 0.5;
   const jumpStrength = -10;
-  const platformSpacing = canvas.height / 12;
-  const platformHeight = canvas.height / 10;
-
-  const isMobile = /Mobi|Android/i.test(navigator.userAgent);
-  const platformWidth = isMobile ? canvas.width / 4.5 : canvas.width / 1.5;
-
-  const pumpkinPattern = [3, 4, 7];
+  const platformSpacing = canvas.height / 14;
+  const platformHeight = canvas.height / 12;
+  const platformWidth = canvas.width / 3;
+  const pumpkinMin = 5;
+  const pumpkinMax = 10;
+  let pumpkinCounter = 0;
 
   const images = {};
   const loadImage = (name, src) => {
@@ -69,8 +69,9 @@ window.onload = () => {
     scrollOffset = 0;
     gameOver = false;
     pumpkinsCollected = 0;
+    pumpkinCounter = 0;
 
-    for (let i = 0; i < 20; i++) {
+    for (let i = 0; i < 30; i++) {
       createPlatform(i);
     }
 
@@ -87,11 +88,16 @@ window.onload = () => {
   }
 
   function createPlatform(index) {
-    const x = Math.random() * (canvas.width - platformWidth);
+    const maxHorizontalGap = canvas.width - platformWidth;
+    const x = Math.random() * maxHorizontalGap;
     const y = canvas.height - index * platformSpacing;
     platforms.push({ x, y, width: platformWidth, height: platformHeight });
 
-    if (pumpkinPattern.includes(index % 10)) {
+    pumpkinCounter++;
+    if (
+      pumpkinCounter >= pumpkinMin &&
+      (pumpkinCounter >= pumpkinMax || Math.random() < 0.3)
+    ) {
       pumpkins.push({
         x: x + platformWidth / 2 - canvas.width / 40,
         y: y - canvas.height / 30,
@@ -99,11 +105,16 @@ window.onload = () => {
         height: canvas.height / 30,
         collected: false
       });
+      pumpkinCounter = 0;
     }
   }
 
   function gameLoop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Плавное движение
+    if (keysPressed['ArrowLeft']) player.x -= 3;
+    if (keysPressed['ArrowRight']) player.x += 3;
 
     player.vy += gravity;
     player.y += player.vy;
@@ -116,8 +127,8 @@ window.onload = () => {
       pumpkins.forEach(p => p.y += dy);
     }
 
-    platforms = platforms.filter(p => p.y < canvas.height);
-    while (platforms.length < 20) {
+    platforms = platforms.filter(p => p.y < canvas.height + platformHeight);
+    while (platforms.length < 30) {
       createPlatform(platforms.length + scrollOffset / platformSpacing);
     }
 
@@ -174,4 +185,47 @@ window.onload = () => {
     const scores = JSON.parse(localStorage.getItem('halloweenScores') || '[]');
     scores.push({ name: playerName, score: pumpkinsCollected });
     scores.sort((a, b) => b.score - a.score);
-    local
+    localStorage.setItem('halloweenScores', JSON.stringify(scores.slice(0, 5)));
+    updateLeaderboard();
+  }
+
+  function updateLeaderboard() {
+    leaderboard.innerHTML = '';
+    const scores = JSON.parse(localStorage.getItem('halloweenScores') || '[]');
+    scores.forEach(s => {
+      const li = document.createElement('li');
+      li.textContent = `${s.name}: ${s.score} 🎃`;
+      leaderboard.appendChild(li);
+    });
+  }
+
+  // Плавное управление
+  document.addEventListener('keydown', (e) => {
+    keysPressed[e.key] = true;
+  });
+
+  document.addEventListener('keyup', (e) => {
+    keysPressed[e.key] = false;
+  });
+
+  // Свайпы
+  let touchStartX = null;
+  canvas.addEventListener('touchstart', (e) => {
+    touchStartX = e.touches[0].clientX;
+  });
+
+  canvas.addEventListener('touchend', (e) => {
+    if (!player || touchStartX === null) return;
+    const touchEndX = e.changedTouches[0].clientX;
+    const dx = touchEndX - touchStartX;
+    if (Math.abs(dx) > 30) {
+      if (dx > 0) keysPressed['ArrowRight'] = true;
+      else keysPressed['ArrowLeft'] = true;
+      setTimeout(() => {
+        keysPressed['ArrowRight'] = false;
+        keysPressed['ArrowLeft'] = false;
+      }, 200);
+    }
+    touchStartX = null;
+  });
+};
