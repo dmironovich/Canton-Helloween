@@ -15,7 +15,8 @@ let scrollOffset = 0;
 
 const gravity = 0.5;
 const jumpStrength = -10;
-const platformSpacing = 100;
+const platformSpacing = 60; // меньшее расстояние
+const platformHeight = 60;  // увеличенная толщина
 const pumpkinPattern = [3, 4, 7];
 
 const images = {};
@@ -37,22 +38,24 @@ startButton.onclick = () => {
 };
 
 function initGame() {
-  player = {
-    x: canvas.width / 2 - 20,
-    y: canvas.height - 60,
-    width: 40,
-    height: 40,
-    vy: 0
-  };
-  pumpkinsCollected = 0;
   platforms = [];
   pumpkins = [];
   scrollOffset = 0;
   gameOver = false;
+  pumpkinsCollected = 0;
 
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < 20; i++) {
     createPlatform(i);
   }
+
+  const firstPlatform = platforms[0];
+  player = {
+    x: firstPlatform.x + firstPlatform.width / 2 - 20,
+    y: firstPlatform.y - 40,
+    width: 40,
+    height: 40,
+    vy: 0
+  };
 
   requestAnimationFrame(gameLoop);
 }
@@ -60,10 +63,10 @@ function initGame() {
 function createPlatform(index) {
   const x = Math.random() * (canvas.width - 80);
   const y = canvas.height - index * platformSpacing;
-  platforms.push({ x, y, width: 80, height: 20 });
+  platforms.push({ x, y, width: 80, height: platformHeight });
 
   if (pumpkinPattern.includes(index % 10)) {
-    pumpkins.push({ x: x + 30, y: y - 20, width: 20, height: 20, collected: false });
+    pumpkins.push({ x: x + 30, y: y - 30, width: 20, height: 20, collected: false });
   }
 }
 
@@ -82,7 +85,7 @@ function gameLoop() {
   }
 
   platforms = platforms.filter(p => p.y < canvas.height);
-  while (platforms.length < 10) {
+  while (platforms.length < 20) {
     createPlatform(platforms.length + scrollOffset / platformSpacing);
   }
 
