@@ -187,4 +187,24 @@ function updateLeaderboard() {
 // Управление с клавиатуры
 document.addEventListener('keydown', (e) => {
   if (!player) return;
-  if (e.key === 'ArrowLeft') player.x -= canvas.width /
+  if (e.key === 'ArrowLeft') player.x -= canvas.width / 20;
+  if (e.key === 'ArrowRight') player.x += canvas.width / 20;
+});
+
+// Управление свайпом
+let touchStartX = null;
+canvas.addEventListener('touchstart', (e) => {
+  touchStartX = e.touches[0].clientX;
+});
+
+canvas.addEventListener('touchend', (e) => {
+  if (!player || touchStartX === null) return;
+  const touchEndX = e.changedTouches[0].clientX;
+  const dx = touchEndX - touchStartX;
+  if (Math.abs(dx) > 30) {
+    if (dx > 0) player.x += canvas.width / 20;
+    else player.x -= canvas.width / 20;
+  }
+  touchStartX = null;
+});
+
