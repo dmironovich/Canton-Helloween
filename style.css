@@ -7,7 +7,9 @@ body {
   overflow: hidden;
 }
 
-#start-screen,
+#start-screen {
+  display: none;
+}
 #game-over-screen {
   position: absolute;
   top: 30%;
@@ -16,7 +18,9 @@ body {
   z-index: 10;
 }
 
-#start-screen.active,
+#start-screen.active {
+  display: block;
+}
 #game-over-screen.active {
   display: block;
 }
