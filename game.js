@@ -178,4 +178,14 @@ function updateLeaderboard() {
   leaderboard.innerHTML = '';
   const scores = JSON.parse(localStorage.getItem('halloweenScores') || '[]');
   scores.forEach(s => {
-    const li = document.create
+    const li = document.createElement('li');
+    li.textContent = `${s.name}: ${s.score} 🎃`;
+    leaderboard.appendChild(li);
+  });
+}
+
+// Управление с клавиатуры
+document.addEventListener('keydown', (e) => {
+  if (!player) return;
+  if (e.key === 'ArrowLeft') player.x -= canvas.width / 20;
+  if (e
