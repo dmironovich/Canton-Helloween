@@ -1,189 +1,164 @@
-const canvas = document.getElementById("gameCanvas");
-const ctx = canvas.getContext("2d");
+const canvas = document.getElementById('game-canvas');
+const ctx = canvas.getContext('2d');
+const startScreen = document.getElementById('start-screen');
+const startButton = document.getElementById('start-button');
+const playerNameInput = document.getElementById('player-name');
+const leaderboard = document.getElementById('scores');
 
-let playerName = "";
-let score = 0;
-let player;
-let pumpkins = [];
+let playerName = '';
+let pumpkinsCollected = 0;
 let platforms = [];
-let gravity = 0.5;
-let keys = {};
-let gameRunning = false;
+let pumpkins = [];
+let player;
+let gameOver = false;
 let scrollOffset = 0;
-let platformCounter = 0;
 
-function startGame() {
-  playerName = document.getElementById("player-name").value || "Anonymous";
-  document.getElementById("start-screen").style.display = "none";
-  document.getElementById("game-container").style.display = "block";
-  document.getElementById("restart-button").style.display = "none";
-  score = 0;
+const gravity = 0.5;
+const jumpStrength = -10;
+const platformSpacing = 100;
+const pumpkinPattern = [3, 4, 7];
+
+const images = {};
+const loadImage = (name, src) => {
+  const img = new Image();
+  img.src = src;
+  images[name] = img;
+};
+
+loadImage('player', 'assets/player.png');
+loadImage('platform', 'assets/platform.png');
+loadImage('pumpkin', 'assets/pumpkin.png');
+
+startButton.onclick = () => {
+  playerName = playerNameInput.value || 'Player';
+  startScreen.style.display = 'none';
+  canvas.style.display = 'block';
+  initGame();
+};
+
+function initGame() {
+  player = {
+    x: canvas.width / 2 - 20,
+    y: canvas.height - 60,
+    width: 40,
+    height: 40,
+    vy: 0
+  };
+  pumpkinsCollected = 0;
+  platforms = [];
+  pumpkins = [];
   scrollOffset = 0;
-  platformCounter = 0;
-  document.getElementById("score").textContent = `Pumpkins: 0`;
-  init();
-  gameRunning = true;
+  gameOver = false;
+
+  for (let i = 0; i < 10; i++) {
+    createPlatform(i);
+  }
+
   requestAnimationFrame(gameLoop);
 }
 
-function restartGame() {
-  startGame();
-}
+function createPlatform(index) {
+  const x = Math.random() * (canvas.width - 80);
+  const y = canvas.height - index * platformSpacing;
+  platforms.push({ x, y, width: 80, height: 20 });
 
-function init() {
-  platforms = [];
-  pumpkins = [];
-
-  // Начальные платформы
-  for (let i = 0; i < 12; i++) {
-    addPlatform(i);
+  if (pumpkinPattern.includes(index % 10)) {
+    pumpkins.push({ x: x + 30, y: y - 20, width: 20, height: 20, collected: false });
   }
-
-  const firstPlatform = platforms[0];
-  player = {
-    x: firstPlatform.x + 20,
-    y: firstPlatform.y - 32,
-    width: 32,
-    height: 32,
-    vy: 0,
-    img: loadImage("assets/canton.png")
-  };
-
-  window.addEventListener("keydown", e => keys[e.key] = true);
-  window.addEventListener("keyup", e => keys[e.key] = false);
-}
-
-function addPlatform(index) {
-  const stepY = 60;
-  const y = canvas.height - 60 - index * stepY;
-  const x = 80 + (index % 2 === 0 ? 0 : 120);
-  platforms.push({
-    x,
-    y,
-    width: 96,
-    height: 24,
-    img: loadImage("assets/platform.png"),
-    id: platformCounter++
-  });
-
-  if (index === 2 || index % 4 === 0 || index % 7 === 0) {
-    pumpkins.push({
-      x: x + 30,
-      y: y - 30,
-      width: 24,
-      height: 24,
-      collected: false,
-      img: loadImage("assets/pumpkin.png"),
-      platformId: platformCounter - 1
-    });
-  }
-}
-
-function loadImage(src) {
-  const img = new Image();
-  img.src = src;
-  return img;
 }
 
 function gameLoop() {
-  if (!gameRunning) return;
-
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // Движение игрока
-  if (keys["ArrowLeft"]) player.x -= 4;
-  if (keys["ArrowRight"]) player.x += 4;
   player.vy += gravity;
   player.y += player.vy;
 
-  // Прокрутка вверх
   if (player.y < canvas.height / 2) {
-    const delta = canvas.height / 2 - player.y;
+    const dy = canvas.height / 2 - player.y;
     player.y = canvas.height / 2;
-    scrollOffset += delta;
-    platforms.forEach(p => p.y += delta);
-    pumpkins.forEach(p => p.y += delta);
+    scrollOffset += dy;
+    platforms.forEach(p => p.y += dy);
+    pumpkins.forEach(p => p.y += dy);
   }
 
-  // Коллизии с платформами
+  platforms = platforms.filter(p => p.y < canvas.height);
+  while (platforms.length < 10) {
+    createPlatform(platforms.length + scrollOffset / platformSpacing);
+  }
+
   platforms.forEach(p => {
+    ctx.drawImage(images.platform, p.x, p.y, p.width, p.height);
     if (
-      player.x < p.x + p.width &&
+      player.vy > 0 &&
       player.x + player.width > p.x &&
-      player.y + player.height < p.y + p.height &&
-      player.y + player.height + player.vy >= p.y
+      player.x < p.x + p.width &&
+      player.y + player.height > p.y &&
+      player.y + player.height < p.y + p.height + player.vy
     ) {
-      player.vy = -10;
+      player.vy = jumpStrength;
     }
-    ctx.drawImage(p.img, p.x, p.y, p.width, p.height);
   });
 
-  // Сбор тыкв
   pumpkins.forEach(p => {
-    if (!p.collected &&
-      player.x < p.x + p.width &&
-      player.x + player.width > p.x &&
-      player.y < p.y + p.height &&
-      player.y + player.height > p.y
-    ) {
-      p.collected = true;
-      score++;
-      document.getElementById("score").textContent = `Pumpkins: ${score}`;
+    if (!p.collected) {
+      ctx.drawImage(images.pumpkin, p.x, p.y, p.width, p.height);
+      if (
+        player.x < p.x + p.width &&
+        player.x + player.width > p.x &&
+        player.y < p.y + p.height &&
+        player.y + player.height > p.y
+      ) {
+        p.collected = true;
+        pumpkinsCollected++;
+      }
     }
-    if (!p.collected) ctx.drawImage(p.img, p.x, p.y, p.width, p.height);
   });
 
-  // Отрисовка игрока
-  ctx.drawImage(player.img, player.x, player.y, player.width, player.height);
+  ctx.drawImage(images.player, player.x, player.y, player.width, player.height);
+  ctx.fillStyle = 'orange';
+  ctx.font = '20px monospace';
+  ctx.fillText(`🎃 Collected: ${pumpkinsCollected}`, 10, 30);
 
-  // Удаление нижних платформ
-  platforms = platforms.filter(p => p.y < canvas.height + 100);
-  pumpkins = pumpkins.filter(p => p.y < canvas.height + 100);
-
-  // Добавление новых платформ
-  const highestY = Math.min(...platforms.map(p => p.y));
-  while (highestY > -60 * 2) {
-    addPlatform(platforms.length);
-  }
-
-  // Game Over
   if (player.y > canvas.height) {
-    saveScore();
-    gameRunning = false;
-    showRestart(score);
+    endGame();
+    return;
   }
 
   requestAnimationFrame(gameLoop);
 }
 
-function showRestart(finalScore) {
-  const btn = document.getElementById("restart-button");
-  btn.style.display = "inline-block";
-  btn.style.position = "absolute";
-  btn.style.left = "50%";
-  btn.style.top = "50%";
-  btn.style.transform = "translate(-50%, -50%)";
-  btn.innerHTML = `Restart<br>🎃 Собрано: ${finalScore} тыкв`;
+function endGame() {
+  gameOver = true;
+  ctx.fillStyle = 'black';
+  ctx.fillRect(0, canvas.height / 2 - 50, canvas.width, 100);
+  ctx.fillStyle = 'orange';
+  ctx.font = '20px monospace';
+  ctx.fillText(`🎃 Collected: ${pumpkinsCollected}`, canvas.width / 2 - 80, canvas.height / 2 - 10);
+  ctx.fillText(`Click to Restart`, canvas.width / 2 - 70, canvas.height / 2 + 20);
+
+  saveScore();
+  canvas.onclick = () => {
+    if (gameOver) {
+      canvas.onclick = null;
+      initGame();
+    }
+  };
 }
 
 function saveScore() {
-  let scores = JSON.parse(localStorage.getItem("cantonScores") || "[]");
-  scores.push({ name: playerName, score });
+  const scores = JSON.parse(localStorage.getItem('halloweenScores') || '[]');
+  scores.push({ name: playerName, score: pumpkinsCollected });
   scores.sort((a, b) => b.score - a.score);
-  scores = scores.slice(0, 5);
-  localStorage.setItem("cantonScores", JSON.stringify(scores));
-  updateLeaderboard(scores);
+  localStorage.setItem('halloweenScores', JSON.stringify(scores.slice(0, 5)));
+  updateLeaderboard();
 }
 
-function updateLeaderboard(scores) {
-  const list = document.getElementById("leaderboard-list");
-  list.innerHTML = "";
+function updateLeaderboard() {
+  leaderboard.innerHTML = '';
+  const scores = JSON.parse(localStorage.getItem('halloweenScores') || '[]');
   scores.forEach(s => {
-    const li = document.createElement("li");
-    li.textContent = `${s.name}: 🎃 ${s.score}`;
-    list.appendChild(li);
+    const li = document.createElement('li');
+    li.textContent = `${s.name}: ${s.score} 🎃`;
+    leaderboard.appendChild(li);
   });
 }
-
-updateLeaderboard(JSON.parse(localStorage.getItem("cantonScores") || "[]"));
-
