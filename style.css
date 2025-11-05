@@ -1,22 +1,32 @@
 body {
   margin: 0;
   font-family: 'Courier New', monospace;
-  background-color: #1a1a1a;
+  background-color: #000;
   color: orange;
   text-align: center;
+  overflow: hidden;
 }
 
-#start-screen {
+#start-screen,
+#game-over-screen {
   position: absolute;
-  top: 20%;
+  top: 30%;
   width: 100%;
+  display: none;
+  z-index: 10;
+}
+
+#start-screen.active,
+#game-over-screen.active {
+  display: block;
 }
 
 #game-canvas {
   display: none;
-  background: url('assets/background.png') repeat-y;
-  margin: 0 auto;
-  border: 2px solid orange;
+  width: 100vw;
+  height: 100vh;
+  background: url('assets/background.png') repeat-y center center;
+  background-size: cover;
 }
 
 #leaderboard {
@@ -26,4 +36,14 @@ body {
 #scores {
   list-style: none;
   padding: 0;
+}
+
+button {
+  margin: 10px;
+  padding: 10px 20px;
+  font-size: 18px;
+  background-color: orange;
+  border: none;
+  color: black;
+  cursor: pointer;
 }
