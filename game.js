@@ -1,9 +1,16 @@
 const canvas = document.getElementById('game-canvas');
 const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
 const startScreen = document.getElementById('start-screen');
 const startButton = document.getElementById('start-button');
 const playerNameInput = document.getElementById('player-name');
 const leaderboard = document.getElementById('scores');
+const gameOverScreen = document.getElementById('game-over-screen');
+const finalScore = document.getElementById('final-score');
+const restartButton = document.getElementById('restart-button');
+const lobbyButton = document.getElementById('lobby-button');
 
 let playerName = '';
 let pumpkinsCollected = 0;
@@ -15,8 +22,8 @@ let scrollOffset = 0;
 
 const gravity = 0.5;
 const jumpStrength = -10;
-const platformSpacing = 60; // меньшее расстояние
-const platformHeight = 60;  // увеличенная толщина
+const platformSpacing = 60;
+const platformHeight = 60;
 const pumpkinPattern = [3, 4, 7];
 
 const images = {};
@@ -32,9 +39,20 @@ loadImage('pumpkin', 'assets/pumpkin.png');
 
 startButton.onclick = () => {
   playerName = playerNameInput.value || 'Player';
-  startScreen.style.display = 'none';
+  startScreen.classList.remove('active');
   canvas.style.display = 'block';
   initGame();
+};
+
+restartButton.onclick = () => {
+  gameOverScreen.classList.remove('active');
+  initGame();
+};
+
+lobbyButton.onclick = () => {
+  gameOverScreen.classList.remove('active');
+  canvas.style.display = 'none';
+  startScreen.classList.add('active');
 };
 
 function initGame() {
@@ -54,7 +72,7 @@ function initGame() {
     y: firstPlatform.y - 40,
     width: 40,
     height: 40,
-    vy: 0
+    vy: jumpStrength // сразу прыгает
   };
 
   requestAnimationFrame(gameLoop);
@@ -132,20 +150,10 @@ function gameLoop() {
 
 function endGame() {
   gameOver = true;
-  ctx.fillStyle = 'black';
-  ctx.fillRect(0, canvas.height / 2 - 50, canvas.width, 100);
-  ctx.fillStyle = 'orange';
-  ctx.font = '20px monospace';
-  ctx.fillText(`🎃 Collected: ${pumpkinsCollected}`, canvas.width / 2 - 80, canvas.height / 2 - 10);
-  ctx.fillText(`Click to Restart`, canvas.width / 2 - 70, canvas.height / 2 + 20);
-
+  canvas.onclick = null;
+  finalScore.textContent = pumpkinsCollected;
+  gameOverScreen.classList.add('active');
   saveScore();
-  canvas.onclick = () => {
-    if (gameOver) {
-      canvas.onclick = null;
-      initGame();
-    }
-  };
 }
 
 function saveScore() {
@@ -165,3 +173,4 @@ function updateLeaderboard() {
     leaderboard.appendChild(li);
   });
 }
+
