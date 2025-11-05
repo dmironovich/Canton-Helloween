@@ -9,6 +9,8 @@ let platforms = [];
 let gravity = 0.5;
 let keys = {};
 let gameRunning = false;
+let scrollOffset = 0;
+let platformCounter = 0;
 
 function startGame() {
   playerName = document.getElementById("player-name").value || "Anonymous";
@@ -16,6 +18,8 @@ function startGame() {
   document.getElementById("game-container").style.display = "block";
   document.getElementById("restart-button").style.display = "none";
   score = 0;
+  scrollOffset = 0;
+  platformCounter = 0;
   document.getElementById("score").textContent = `Pumpkins: 0`;
   init();
   gameRunning = true;
@@ -27,21 +31,14 @@ function restartGame() {
 }
 
 function init() {
-  // Ступенчатое расположение платформ
   platforms = [];
-  const stepY = 100;
-  const baseY = canvas.height - 60;
-  for (let i = 0; i < 5; i++) {
-    platforms.push({
-      x: 60 + (i % 2 === 0 ? 0 : 200),
-      y: baseY - i * stepY,
-      width: 96,
-      height: 24,
-      img: loadImage("assets/platform.png")
-    });
+  pumpkins = [];
+
+  // Начальные платформы
+  for (let i = 0; i < 12; i++) {
+    addPlatform(i);
   }
 
-  // Игрок стартует на нижней платформе
   const firstPlatform = platforms[0];
   player = {
     x: firstPlatform.x + 20,
@@ -52,21 +49,34 @@ function init() {
     img: loadImage("assets/canton.png")
   };
 
-  // Тыквы
-  pumpkins = [];
-  for (let i = 0; i < 5; i++) {
+  window.addEventListener("keydown", e => keys[e.key] = true);
+  window.addEventListener("keyup", e => keys[e.key] = false);
+}
+
+function addPlatform(index) {
+  const stepY = 60;
+  const y = canvas.height - 60 - index * stepY;
+  const x = 80 + (index % 2 === 0 ? 0 : 120);
+  platforms.push({
+    x,
+    y,
+    width: 96,
+    height: 24,
+    img: loadImage("assets/platform.png"),
+    id: platformCounter++
+  });
+
+  if (index === 2 || index % 4 === 0 || index % 7 === 0) {
     pumpkins.push({
-      x: platforms[i].x + 30,
-      y: platforms[i].y - 30,
+      x: x + 30,
+      y: y - 30,
       width: 24,
       height: 24,
       collected: false,
-      img: loadImage("assets/pumpkin.png")
+      img: loadImage("assets/pumpkin.png"),
+      platformId: platformCounter - 1
     });
   }
-
-  window.addEventListener("keydown", e => keys[e.key] = true);
-  window.addEventListener("keyup", e => keys[e.key] = false);
 }
 
 function loadImage(src) {
@@ -85,6 +95,15 @@ function gameLoop() {
   if (keys["ArrowRight"]) player.x += 4;
   player.vy += gravity;
   player.y += player.vy;
+
+  // Прокрутка вверх
+  if (player.y < canvas.height / 2) {
+    const delta = canvas.height / 2 - player.y;
+    player.y = canvas.height / 2;
+    scrollOffset += delta;
+    platforms.forEach(p => p.y += delta);
+    pumpkins.forEach(p => p.y += delta);
+  }
 
   // Коллизии с платформами
   platforms.forEach(p => {
@@ -117,15 +136,34 @@ function gameLoop() {
   // Отрисовка игрока
   ctx.drawImage(player.img, player.x, player.y, player.width, player.height);
 
+  // Удаление нижних платформ
+  platforms = platforms.filter(p => p.y < canvas.height + 100);
+  pumpkins = pumpkins.filter(p => p.y < canvas.height + 100);
+
+  // Добавление новых платформ
+  const highestY = Math.min(...platforms.map(p => p.y));
+  while (highestY > -60 * 2) {
+    addPlatform(platforms.length);
+  }
+
   // Game Over
   if (player.y > canvas.height) {
     saveScore();
     gameRunning = false;
-    document.getElementById("restart-button").style.display = "inline-block";
-    alert("Game Over!");
+    showRestart(score);
   }
 
   requestAnimationFrame(gameLoop);
+}
+
+function showRestart(finalScore) {
+  const btn = document.getElementById("restart-button");
+  btn.style.display = "inline-block";
+  btn.style.position = "absolute";
+  btn.style.left = "50%";
+  btn.style.top = "50%";
+  btn.style.transform = "translate(-50%, -50%)";
+  btn.innerHTML = `Restart<br>🎃 Собрано: ${finalScore} тыкв`;
 }
 
 function saveScore() {
@@ -148,3 +186,4 @@ function updateLeaderboard(scores) {
 }
 
 updateLeaderboard(JSON.parse(localStorage.getItem("cantonScores") || "[]"));
+
