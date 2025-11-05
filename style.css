@@ -12,8 +12,11 @@ body {
 
 canvas {
   border: 2px solid orange;
+  background-size: 50% 50%;
   background: url('assets/bg.png') repeat;
   image-rendering: pixelated;
+}
+
 }
 
 input, button {
