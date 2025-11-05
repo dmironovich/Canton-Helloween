@@ -11,6 +11,7 @@ const gameOverScreen = document.getElementById('game-over-screen');
 const finalScore = document.getElementById('final-score');
 const restartButton = document.getElementById('restart-button');
 const lobbyButton = document.getElementById('lobby-button');
+const gameHeader = document.getElementById('game-header');
 
 let playerName = '';
 let pumpkinsCollected = 0;
@@ -42,6 +43,7 @@ startButton.onclick = () => {
   playerName = playerNameInput.value || 'Player';
   startScreen.classList.remove('active');
   canvas.style.display = 'block';
+  gameHeader.style.display = 'block';
   initGame();
 };
 
@@ -53,6 +55,7 @@ restartButton.onclick = () => {
 lobbyButton.onclick = () => {
   gameOverScreen.classList.remove('active');
   canvas.style.display = 'none';
+  gameHeader.style.display = 'none';
   startScreen.classList.add('active');
 };
 
@@ -175,28 +178,4 @@ function updateLeaderboard() {
   leaderboard.innerHTML = '';
   const scores = JSON.parse(localStorage.getItem('halloweenScores') || '[]');
   scores.forEach(s => {
-    const li = document.createElement('li');
-    li.textContent = `${s.name}: ${s.score} 🎃`;
-    leaderboard.appendChild(li);
-  });
-}
-
-// Управление с клавиатуры
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'ArrowLeft') player.x -= canvas.width / 20;
-  if (e.key === 'ArrowRight') player.x += canvas.width / 20;
-});
-
-// Управление свайпом
-let touchStartX = null;
-canvas.addEventListener('touchstart', (e) => {
-  touchStartX = e.touches[0].clientX;
-});
-
-canvas.addEventListener('touchend', (e) => {
-  if (touchStartX === null) return;
-  const touchEndX = e.changedTouches[0].clientX;
-  const dx = touchEndX - touchStartX;
-  if (Math.abs(dx) > 30) {
-    if (dx > 0) player.x += canvas.width / 20;
-    else player.x -= canvas.width / 20;
+    const li = document.create
