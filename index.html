@@ -1,22 +1,29 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Rialo Halloween Run 🎃</title>
+  <title>Canton Halloween</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="menu" id="menu">
-    <h1>Rialo Halloween Run 🎃</h1>
-    <input type="text" id="playerName" placeholder="Введите имя" />
-    <button id="startBtn">Начать игру</button>
-    <h2>Лидерборд</h2>
-    <ul id="leaderboard"></ul>
-    <p class="hint">Управление: <strong>Пробел</strong> — прыжок. На мобильных коснитесь экрана.</p>
+  <div id="start-screen">
+    <h1>Canton Halloween</h1>
+    <input type="text" id="player-name" placeholder="Enter your name" />
+    <button onclick="startGame()">Start Game</button>
   </div>
 
-  <canvas id="gameCanvas" width="900" height="300"></canvas>
-  <script src="script.js"></script>
+  <div id="game-container" style="display:none;">
+    <h2>Canton Halloween</h2>
+    <canvas id="gameCanvas" width="480" height="640"></canvas>
+    <div id="score">Pumpkins: 0</div>
+  </div>
+
+  <div id="leaderboard">
+    <h3>Leaderboard</h3>
+    <ul id="leaderboard-list"></ul>
+  </div>
+
+  <script src="game.js"></script>
 </body>
 </html>
+
