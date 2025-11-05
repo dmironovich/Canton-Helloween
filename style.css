@@ -7,9 +7,7 @@ body {
   overflow: hidden;
 }
 
-#start-screen {
-  display: none;
-}
+#start-screen,
 #game-over-screen {
   position: absolute;
   top: 30%;
@@ -18,17 +16,16 @@ body {
   z-index: 10;
 }
 
-#start-screen.active {
-  display: block;
-}
+#start-screen.active,
 #game-over-screen.active {
   display: block;
 }
 
 #game-canvas {
   display: none;
-  width: 100vw;
+  width: 400px;
   height: 100vh;
+  margin: 0 auto;
   background: url('assets/background.png') repeat-y center center;
   background-size: cover;
 }
@@ -51,3 +48,4 @@ button {
   color: black;
   cursor: pointer;
 }
+
