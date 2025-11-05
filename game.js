@@ -49,7 +49,7 @@ function init() {
     width: 32,
     height: 32,
     vy: 0,
-    img: loadImage("assets/2canton.png")
+    img: loadImage("assets/canton.png")
   };
 
   // Тыквы
@@ -148,4 +148,3 @@ function updateLeaderboard(scores) {
 }
 
 updateLeaderboard(JSON.parse(localStorage.getItem("cantonScores") || "[]"));
-
