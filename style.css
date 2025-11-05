@@ -21,6 +21,15 @@ body {
   display: block;
 }
 
+#game-header {
+  display: none;
+  font-size: 24px;
+  font-weight: bold;
+  padding: 10px;
+  background-color: #111;
+  color: orange;
+}
+
 #game-canvas {
   display: none;
   width: 400px;
