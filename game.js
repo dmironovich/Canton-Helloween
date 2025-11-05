@@ -8,13 +8,21 @@ let pumpkins = [];
 let platforms = [];
 let gravity = 0.5;
 let keys = {};
+let gameRunning = false;
 
 function startGame() {
   playerName = document.getElementById("player-name").value || "Anonymous";
   document.getElementById("start-screen").style.display = "none";
   document.getElementById("game-container").style.display = "block";
   init();
+  gameRunning = true;
   requestAnimationFrame(gameLoop);
+}
+
+function restartGame() {
+  score = 0;
+  document.getElementById("score").textContent = `Pumpkins: 0`;
+  init();
 }
 
 function init() {
@@ -65,6 +73,8 @@ function loadImage(src) {
 }
 
 function gameLoop() {
+  if (!gameRunning) return;
+
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   // Движение игрока
@@ -108,7 +118,7 @@ function gameLoop() {
   if (player.y > canvas.height) {
     saveScore();
     alert("Game Over!");
-    location.reload();
+    gameRunning = false;
   }
 
   requestAnimationFrame(gameLoop);
@@ -133,5 +143,4 @@ function updateLeaderboard(scores) {
   });
 }
 
-// Инициализация лидерборда при загрузке
 updateLeaderboard(JSON.parse(localStorage.getItem("cantonScores") || "[]"));
