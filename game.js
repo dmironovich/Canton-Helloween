@@ -1,8 +1,12 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
+
 let playerName = "";
 let score = 0;
-let player, pumpkins = [], platforms = [], gravity = 0.5;
+let player;
+let pumpkins = [];
+let platforms = [];
+let gravity = 0.5;
 let keys = {};
 
 function startGame() {
@@ -14,29 +18,35 @@ function startGame() {
 }
 
 function init() {
-  player = {
-    x: 200,
-    y: 500,
-    width: 32,
-    height: 32,
-    vy: 0,
-    img: loadImage("assets/canton.png")
-  };
-
+  // Создаём платформы
+  platforms = [];
   for (let i = 0; i < 5; i++) {
     platforms.push({
-      x: Math.random() * 400,
-      y: i * 120 + 100,
+      x: Math.random() * (canvas.width - 80),
+      y: canvas.height - (i * 120 + 100),
       width: 80,
       height: 20,
       img: loadImage("assets/platform.png")
     });
   }
 
+  // Ставим игрока на первую платформу
+  const firstPlatform = platforms[0];
+  player = {
+    x: firstPlatform.x + 20,
+    y: firstPlatform.y - 32,
+    width: 32,
+    height: 32,
+    vy: 0,
+    img: loadImage("assets/canton.png")
+  };
+
+  // Создаём тыквы
+  pumpkins = [];
   for (let i = 0; i < 3; i++) {
     pumpkins.push({
-      x: Math.random() * 400,
-      y: Math.random() * 500,
+      x: Math.random() * (canvas.width - 24),
+      y: Math.random() * (canvas.height - 100),
       width: 24,
       height: 24,
       collected: false,
@@ -57,13 +67,13 @@ function loadImage(src) {
 function gameLoop() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // Move player
+  // Движение игрока
   if (keys["ArrowLeft"]) player.x -= 4;
   if (keys["ArrowRight"]) player.x += 4;
   player.vy += gravity;
   player.y += player.vy;
 
-  // Collision with platforms
+  // Коллизии с платформами
   platforms.forEach(p => {
     if (
       player.x < p.x + p.width &&
@@ -76,7 +86,7 @@ function gameLoop() {
     ctx.drawImage(p.img, p.x, p.y, p.width, p.height);
   });
 
-  // Collect pumpkins
+  // Сбор тыкв
   pumpkins.forEach(p => {
     if (!p.collected &&
       player.x < p.x + p.width &&
@@ -91,10 +101,10 @@ function gameLoop() {
     if (!p.collected) ctx.drawImage(p.img, p.x, p.y, p.width, p.height);
   });
 
-  // Draw player
+  // Отрисовка игрока
   ctx.drawImage(player.img, player.x, player.y, player.width, player.height);
 
-  // Game over
+  // Game Over
   if (player.y > canvas.height) {
     saveScore();
     alert("Game Over!");
@@ -123,4 +133,5 @@ function updateLeaderboard(scores) {
   });
 }
 
+// Инициализация лидерборда при загрузке
 updateLeaderboard(JSON.parse(localStorage.getItem("cantonScores") || "[]"));
