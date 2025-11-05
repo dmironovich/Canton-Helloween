@@ -2,28 +2,20 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Canton Halloween</title>
+  <title>Halloween Jump 🎃</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div id="start-screen">
-    <h1>Canton Halloween</h1>
+    <h1>Halloween Jump</h1>
     <input type="text" id="player-name" placeholder="Enter your name" />
-    <button onclick="startGame()">Start Game</button>
+    <button id="start-button">Start Game</button>
   </div>
-
-  <div id="game-container" style="display:none;">
-    <h2>Canton Halloween</h2>
-    <canvas id="gameCanvas" width="480" height="640"></canvas>
-    <div id="score">Pumpkins: 0</div>
-    <button id="restart-button" onclick="restartGame()" style="display:none;">Restart</button>
-  </div>
-
+  <canvas id="game-canvas" width="400" height="600"></canvas>
   <div id="leaderboard">
-    <h3>Leaderboard</h3>
-    <ul id="leaderboard-list"></ul>
+    <h2>Leaderboard</h2>
+    <ul id="scores"></ul>
   </div>
-
   <script src="game.js"></script>
 </body>
 </html>
