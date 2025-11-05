@@ -187,5 +187,4 @@ function updateLeaderboard() {
 // Управление с клавиатуры
 document.addEventListener('keydown', (e) => {
   if (!player) return;
-  if (e.key === 'ArrowLeft') player.x -= canvas.width / 20;
-  if (e
+  if (e.key === 'ArrowLeft') player.x -= canvas.width /
